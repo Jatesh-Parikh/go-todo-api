@@ -117,3 +117,34 @@ func GetTodoById(pool *pgxpool.Pool, id int, userID string) (*models.Todo, error
 
 	return &todo, nil
 }
+
+func UpdateTodo(pool *pgxpool.Pool, id int, title string, completed bool, userID string) (*models.Todo, error) {
+	var ctx context.Context
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var query string = `
+		UPDATE todos
+		SET title = $1, completed = $2, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $3 AND user_id = $4
+		RETURNING id, title, completed, created_at, updated_at, user_id
+	`
+
+	var todo models.Todo
+
+	var err error = pool.QueryRow(ctx, query, title, completed, id, userID).Scan(
+		&todo.ID,
+		&todo.Title,
+		&todo.Completed,
+		&todo.CreatedAt,
+		&todo.UpdatedAt,
+		&todo.UserID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &todo, nil
+}
