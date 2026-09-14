@@ -113,7 +113,7 @@ func LoginHandler(pool *pgxpool.Pool, cfg *config.Config) gin.HandlerFunc {
 	}
 }
 
-func TestProtectHandler() gin.HandlerFunc {
+func TestProtectedHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := c.Get("user_id")
 
